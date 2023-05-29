@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask App</title>
+    <!-- Link to the static CSS file -->
+    
+  
+    <meta http-equiv="X-UA-Compatible">
+    <meta name="viewport"
+        content="width=device-width,
+                initial-scale=1.0">
+    <title>SodaSenseWeb</title>
+	<link rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}">
+	<link rel="stylesheet"
+		href="{{ url_for('static', filename='responsive.css') }}">
+</head>
+<body>
+    <!-- for header part -->
+	<header>
+
+		<div class="logosec">
+            
+			<img src="{{ url_for('static', filename='media/Sodasense_logo-e1655794911170.png') }}"
+				class="icn menuicn"
+				id="menuicn"
+				alt="menu-icon">
+		</div>
+    </header>
+
+  <!-- Define a navigation bar -->
+  <nav>
+    <ul>
+      <li><a href="{{ url_for('index') }}">Home</a></li>
+      {% if current_user.is_authenticated %}
+      <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      {% else %}
+      <li><a href="{{ url_for('login') }}">Login</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  <!-- Define a content block that can be overridden by child templates -->
+  {% block content %}
+  {% endblock %}
+  <!-- Link to the static JavaScript file -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

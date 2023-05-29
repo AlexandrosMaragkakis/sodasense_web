@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="margin-top: 10%;"></div>
+<h1>Login</h1>
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+
+<form method="POST" action="{{ url_for('login') }}">
+  <p>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
+  </p>
+  <p>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+  </p>
+  <p>
+    <button type="submit">Login</button>
+  </p>
+</form>
+{% endblock %}
