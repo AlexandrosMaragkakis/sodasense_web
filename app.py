@@ -1,8 +1,10 @@
 # Import flask and other modules
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import requests
 import json
+import base64
+
 
 # Create an app instance
 app = Flask(__name__)
@@ -50,13 +52,36 @@ def login():
 
         response = requests.post(url, data=json.dumps(data), headers=headers)
         
+        # kwdikas thanasi, variemai na to koitaxw.
+        ####################################################
+        token_parts = response.text.split('.')
+        map = json.loads(response.text)
+        #print(map)
+        tmp = token_parts[2].split(',')
+        tmp[0] = tmp[0].replace('"', '')
+        access_token = str(map['access_token'])
+        #print('Ti tipos einai to token ' + access_token)
+        session['access_token'] = access_token
+
+        ## Important!
+        if len(token_parts[1]) % 4 == 1:
+            token_parts[1] = token_parts[1] + '==='
+        elif len(token_parts[1]) % 4 == 2:
+            token_parts[1] = token_parts[1] + '=='
+        elif len(token_parts[1]) % 4 == 3:
+            token_parts[1] = token_parts[1] + '='
+        jsontext = base64.b64decode(token_parts[1])
+        decoded_token = json.loads(jsontext.decode('utf-8'))
+        session['userid'] = decoded_token['sub']
+        ####################################################
+        
         # If the response status code is 200, log in the user and redirect to the index page
         if response.status_code == 200 and response.reason == 'OK' and 'Invalid user credentials' not in response.text:
             login_user(user)
             return redirect(url_for('index'))
         # Otherwise, show an error message
         else:
-            print(response.text)
+            #print(response.text)
             return render_template('login.html', error='Invalid credentials')
     # If the request method is GET, show the login page
     else:
@@ -66,9 +91,34 @@ def login():
 @app.route('/index')
 @login_required
 def index():
-    # Show the index page
-    return render_template('index.html')
 
+    access_token = session.get('access_token')
+    userid = session.get('userid')
+    url = 'http://192.168.48.222/fake-api/alex-test.php'
+    headers = {
+        'Authorization': 'Bearer ' + access_token,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+    payload = {
+        "userId": userid,
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    
+
+    if response.status_code == 200:
+        print("SUCCESS          !!!!!!!")
+        print(response.content)
+        # Save the response content as a temporary file
+        temp_file_path = "/tmp/heatmap.html"  # Replace with your desired temporary file path
+        with open(temp_file_path, 'wb') as f:
+            f.write(response.content)
+
+        # Pass the file path to the template
+        return render_template('index.html', heatmap_file=temp_file_path)
+    else:
+        print("FUCKKK          !!!!!!!")
 # Define a route for the logout page
 @app.route('/logout')
 @login_required

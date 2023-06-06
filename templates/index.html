@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<<div class="main-container">
+<div class="main-container">
     <div class="navcontainer">
         <nav class="nav">
             <div class="nav-upper-options">
@@ -79,8 +79,12 @@
         </div>
 
         <div class="report-container" style="padding: 1vw; display: flex; flex-wrap: wrap;">
-            <iframe src="heatmap_timed_test.html"></iframe>
-            <iframe src="plotly_graph.html"></iframe>
+            {% if heatmap_file %}
+                <iframe src="{{ heatmap_file }}"></iframe>
+                
+            {% endif %}
+            <!-- <iframe src="plotly_graph.html"></iframe>-->
+            
         </div>
     </div>
 </div>
