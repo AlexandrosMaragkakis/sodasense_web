@@ -89,7 +89,7 @@ def login():
         return render_template('login.html')
 
 # Define a route for the index page
-@app.route('/index')
+@app.route('/')
 @login_required
 def index():
 
