@@ -80,8 +80,8 @@
 
         <div class="report-container" style="padding: 1vw; display: flex; flex-wrap: wrap;">
             {% if heatmap_file %}
-                    <iframe src="{{ url_for('static', filename='tmp/tmp_heatmap.html') }}"></iframe>
-
+                <iframe src="{{ heatmap_file }}"></iframe>
+                
             {% endif %}
             <!-- <iframe src="plotly_graph.html"></iframe>-->
             

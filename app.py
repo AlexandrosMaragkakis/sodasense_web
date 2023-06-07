@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import requests
 import json
 import base64
+import codecs
 
 
 # Create an app instance
@@ -108,17 +109,19 @@ def index():
     
 
     if response.status_code == 200:
-        print("SUCCESS          !!!!!!!")
-        print(response.content)
-        # Save the response content as a temporary file
-        temp_file_path = "/tmp/heatmap.html"  # Replace with your desired temporary file path
-        with open(temp_file_path, 'wb') as f:
-            f.write(response.content)
-
+        
+        #print(response.content)
+        tmp_heatmap = "static/tmp/tmp_heatmap.html"
+        with open(tmp_heatmap, "w") as f:
+            f.write(response.text)
         # Pass the file path to the template
-        return render_template('index.html', heatmap_file=temp_file_path)
+        return render_template('index.html', heatmap_file=tmp_heatmap)
     else:
         print("FUCKKK          !!!!!!!")
+
+
+
+
 # Define a route for the logout page
 @app.route('/logout')
 @login_required
