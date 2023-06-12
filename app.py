@@ -4,7 +4,8 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import requests
 import json
 import base64
-import codecs
+
+API_URL = 'http://192.168.48.222/fake-api/dashboard_services/alex-test.php'
 
 
 # Create an app instance
@@ -53,37 +54,40 @@ def login():
 
         response = requests.post(url, data=json.dumps(data), headers=headers)
         
-        # kwdikas thanasi, variemai na to koitaxw.
-        ####################################################
-        token_parts = response.text.split('.')
-        map = json.loads(response.text)
-        #print(map)
-        tmp = token_parts[2].split(',')
-        tmp[0] = tmp[0].replace('"', '')
-        access_token = str(map['access_token'])
-        #print('Ti tipos einai to token ' + access_token)
-        session['access_token'] = access_token
-
-        ## Important!
-        if len(token_parts[1]) % 4 == 1:
-            token_parts[1] = token_parts[1] + '==='
-        elif len(token_parts[1]) % 4 == 2:
-            token_parts[1] = token_parts[1] + '=='
-        elif len(token_parts[1]) % 4 == 3:
-            token_parts[1] = token_parts[1] + '='
-        jsontext = base64.b64decode(token_parts[1])
-        decoded_token = json.loads(jsontext.decode('utf-8'))
-        session['userid'] = decoded_token['sub']
-        ####################################################
-        
         # If the response status code is 200, log in the user and redirect to the index page
         if response.status_code == 200 and response.reason == 'OK' and 'Invalid user credentials' not in response.text:
+
+
+            ####################################################
+            token_parts = response.text.split('.')
+            map = json.loads(response.text)
+
+
+            #####################
+            tmp = token_parts[2].split(',')
+            tmp[0] = tmp[0].replace('"', '')
+            access_token = str(map['access_token'])
+            #print('Ti tipos einai to token ' + access_token)
+            session['access_token'] = access_token
+
+            ## Important!
+            if len(token_parts[1]) % 4 == 1:
+                token_parts[1] = token_parts[1] + '==='
+            elif len(token_parts[1]) % 4 == 2:
+                token_parts[1] = token_parts[1] + '=='
+            elif len(token_parts[1]) % 4 == 3:
+                token_parts[1] = token_parts[1] + '='
+            jsontext = base64.b64decode(token_parts[1])
+            decoded_token = json.loads(jsontext.decode('utf-8'))
+            session['userid'] = decoded_token['sub']
+            ####################################################
+
             login_user(user)
             return redirect(url_for('index'))
         # Otherwise, show an error message
         else:
             #print(response.text)
-            return render_template('login.html', error='Invalid credentials')
+            return render_template('login.html', error='Invalid credentials.')
     # If the request method is GET, show the login page
     else:
         return render_template('login.html')
@@ -93,9 +97,10 @@ def login():
 @login_required
 def index():
 
+
     access_token = session.get('access_token')
     userid = session.get('userid')
-    url = 'http://192.168.48.222/fake-api/alex-test.php'
+    # url = 'http://192.168.48.222/fake-api/alex-test.php'
     headers = {
         'Authorization': 'Bearer ' + access_token,
         'Accept': 'application/json',
@@ -104,20 +109,18 @@ def index():
     payload = {
         "userId": userid,
     }
-
-    response = requests.post(url, headers=headers, json=payload)
-    
+    response = requests.post(API_URL, headers=headers, json=payload)
     
     if response.status_code == 200:
         
         #print(response.content)
-        tmp_heatmap = "static/tmp/tmp_heatmap.html"
+        tmp_heatmap = f"static/tmp/{userid}_heatmap.html"
         with open(tmp_heatmap, "w") as f:
             f.write(response.text)
         # Pass the file path to the template
         return render_template('index.html', heatmap_file=tmp_heatmap)
     else:
-        print("FUCKKK          !!!!!!!")
+        print("NOT GOOD          !!!!!!!")
 
 
 
