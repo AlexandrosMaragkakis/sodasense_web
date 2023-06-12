@@ -1,9 +1,11 @@
 # Import flask and other modules
+import os
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import requests
 import json
 import base64
+
 
 API_URL = 'http://192.168.48.222/fake-api/dashboard_services/alex-test.php'
 
@@ -97,30 +99,33 @@ def login():
 @login_required
 def index():
 
-
-    access_token = session.get('access_token')
     userid = session.get('userid')
-    # url = 'http://192.168.48.222/fake-api/alex-test.php'
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    }
-    payload = {
-        "userId": userid,
-    }
-    response = requests.post(API_URL, headers=headers, json=payload)
-    
-    if response.status_code == 200:
+    heatmap_filepath = f"static/tmp/{userid}_heatmap.html"
+
+    if not os.path.exists(f'static/tmp/{userid}_heatmap.html'):
         
-        #print(response.content)
-        tmp_heatmap = f"static/tmp/{userid}_heatmap.html"
-        with open(tmp_heatmap, "w") as f:
-            f.write(response.text)
-        # Pass the file path to the template
-        return render_template('index.html', heatmap_file=tmp_heatmap)
-    else:
-        print("NOT GOOD          !!!!!!!")
+        access_token = session.get('access_token')
+        
+        headers = {
+            'Authorization': 'Bearer ' + access_token,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        payload = {
+            "userId": userid,
+        }
+        response = requests.post(API_URL, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            with open(heatmap_filepath, "w") as f:
+                f.write(response.text)
+        else:
+            # ERROR HANDLING NEEDED
+            print("NOT GOOD !!!!!!!")
+
+    # Pass the file path to the template
+    return render_template('index.html', heatmap_file=heatmap_filepath)
+        
 
 
 
@@ -132,6 +137,10 @@ def logout():
     # Log out the user and redirect to the login page
     logout_user()
     return redirect(url_for('login'))
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html')
 
 # Run the app
 if __name__ == '__main__':
