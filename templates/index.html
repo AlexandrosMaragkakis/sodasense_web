@@ -8,23 +8,36 @@
       {% if loading %}
         // Show loading message
         $("#heatmap-container").text("Loading content...");
-
+  
         // Fetch the heatmap file using AJAX
         $.ajax({
           url: "/fetch_heatmap",
           type: "POST",
           success: function(data) {
-            // Replace the loading message with the heatmap file
-            $("#heatmap-container").html('<iframe src="../' + data.filepath + '"></iframe>');
+            // Check if the response contains a file path
+            if (data.filepath) {
+              // Replace the loading message with the heatmap file
+              $("#heatmap-container").html('<iframe src="' + data.filepath + '"></iframe>');
+            } else {
+              // Display an error message if the response is invalid
+              $("#heatmap-container").html('<p class="error-message">Invalid response received.</p>');
+            }
           },
-          error: function() {
-            // Display an error message if the API request fails
-            $("#heatmap-container").text("An error occurred while fetching the heatmap.");
+          error: function(xhr, status, error) {
+            if (xhr.responseJSON && xhr.responseJSON.error) {
+              // Display the specific error message for API request failure
+              $("#heatmap-container").html('<p class="error-message">' + xhr.responseJSON.error + '</p>');
+            } else {
+              // Display a generic error message for other errors
+              $("#heatmap-container").html('<p class="error-message">An error occurred while fetching the heatmap.</p>');
+            }
           }
         });
       {% endif %}
     });
   </script>
+  
+  
 
   
 <div class="main-container">
@@ -116,5 +129,4 @@
     </div>
 </div>
 
-<script src="../scripts/index.js"></script>
 {% endblock %}

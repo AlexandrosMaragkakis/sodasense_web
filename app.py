@@ -1,6 +1,6 @@
 # Import flask and other modules
 import os
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import requests
 import json
@@ -107,6 +107,7 @@ def index():
 
     return render_template('index.html', heatmap_file=heatmap_filepath)
 
+# endpoint to fetch heatmap asychronously
 @app.route('/fetch_heatmap', methods=['POST'])
 def fetch_heatmap():
     userid = session.get('userid')
@@ -148,7 +149,10 @@ def logout():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html')
+    if request.path.startswith('/fetch_heatmap'):
+        return jsonify(error="An error occurred while fetching the heatmap."), 404
+    else:
+        return render_template('404.html'), 404
 
 # Run the app
 if __name__ == '__main__':
