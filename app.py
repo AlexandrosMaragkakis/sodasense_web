@@ -98,12 +98,21 @@ def login():
 @app.route('/')
 @login_required
 def index():
-
     userid = session.get('userid')
     heatmap_filepath = f"static/tmp/{userid}_heatmap.html"
 
-    if not os.path.exists(f'static/tmp/{userid}_heatmap.html'):
-        
+    if not os.path.exists(heatmap_filepath):
+        # Render the initial state with loading message
+        return render_template('index.html', loading=True)
+
+    return render_template('index.html', heatmap_file=heatmap_filepath)
+
+@app.route('/fetch_heatmap', methods=['POST'])
+def fetch_heatmap():
+    userid = session.get('userid')
+    heatmap_filepath = f"static/tmp/{userid}_heatmap.html"
+
+    if not os.path.exists(heatmap_filepath):
         access_token = session.get('access_token')
         
         headers = {
@@ -115,17 +124,16 @@ def index():
             "userId": userid,
         }
         response = requests.post(API_URL, headers=headers, json=payload)
-        
+
         if response.status_code == 200:
             with open(heatmap_filepath, "w") as f:
                 f.write(response.text)
         else:
-            # ERROR HANDLING NEEDED
-            print("NOT GOOD !!!!!!!")
+            # Handle the error by returning an error response
+            return {'error': 'An error occurred while fetching the heatmap.'}
 
-    # Pass the file path to the template
-    return render_template('index.html', heatmap_file=heatmap_filepath)
-        
+    # Return the heatmap file path in the response
+    return {'filepath': heatmap_filepath}
 
 
 

@@ -1,6 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+      {% if loading %}
+        // Show loading message
+        $("#heatmap-container").text("Loading content...");
+
+        // Fetch the heatmap file using AJAX
+        $.ajax({
+          url: "/fetch_heatmap",
+          type: "POST",
+          success: function(data) {
+            // Replace the loading message with the heatmap file
+            $("#heatmap-container").html('<iframe src="../' + data.filepath + '"></iframe>');
+          },
+          error: function() {
+            // Display an error message if the API request fails
+            $("#heatmap-container").text("An error occurred while fetching the heatmap.");
+          }
+        });
+      {% endif %}
+    });
+  </script>
+
+  
 <div class="main-container">
     <div class="navcontainer">
         <nav class="nav">
@@ -78,10 +104,12 @@
             </div>
         </div>
 
-        <div class="report-container" style="padding: 1vw; display: flex; flex-wrap: wrap;">
-            {% if heatmap_file %}
-                    <iframe src="{{ heatmap_file }}"></iframe>
-            {% endif %}
+        <div class="report-container">
+            <div id="heatmap-container">
+                {% if heatmap_file %}
+                  <iframe src="{{ heatmap_file }}"></iframe>
+                {% endif %}
+              </div>
             <!-- <iframe src="plotly_graph.html"></iframe>-->
             
         </div>
