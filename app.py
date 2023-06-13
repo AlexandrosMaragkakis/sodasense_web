@@ -7,7 +7,7 @@ import json
 import base64
 
 
-API_URL = 'http://192.168.48.222/fake-api/dashboard_services/alex-test.php'
+API_URL = 'http://192.168.48.222/fake-api/dashboard_services/charts.php'
 
 
 # Create an app instance
@@ -100,12 +100,16 @@ def login():
 def index():
     userid = session.get('userid')
     heatmap_filepath = f"static/tmp/{userid}_heatmap.html"
+    timed_heatmap_filepath = f"static/tmp/{userid}_timed_heatmap.html"
 
-    if not os.path.exists(heatmap_filepath):
-        # Render the initial state with loading message
-        return render_template('index.html', loading=True)
-
-    return render_template('index.html', heatmap_file=heatmap_filepath)
+    if not os.path.exists(heatmap_filepath) and not os.path.exists(timed_heatmap_filepath):
+        return render_template('index.html', load_heatmap=True, load_timed_heatmap=True)
+    elif not os.path.exists(heatmap_filepath):
+        return render_template('index.html', load_heatmap=True, load_timed_heatmap=False, timed_heatmap_file=timed_heatmap_filepath)
+    elif not os.path.exists(timed_heatmap_filepath):
+        return render_template('index.html', load_heatmap=False, load_timed_heatmap=True, heatmap_file=heatmap_filepath)
+    else:
+        return render_template('index.html', heatmap_file=heatmap_filepath, timed_heatmap_file=timed_heatmap_filepath)
 
 # endpoint to fetch heatmap asychronously
 @app.route('/fetch_heatmap', methods=['POST'])
@@ -136,6 +140,35 @@ def fetch_heatmap():
     # Return the heatmap file path in the response
     return {'filepath': heatmap_filepath}
 
+@app.route('/fetch_chart', methods=['POST'])
+def fetch_chart():
+    userid = session.get('userid')
+    chart_name = request.json.get('chartName')
+    chart_filepath = f"static/tmp/{userid}_{chart_name}.html"
+
+    if not os.path.exists(chart_filepath):
+        access_token = session.get('access_token')
+        
+        headers = {
+            'Authorization': 'Bearer ' + access_token,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        payload = {
+            "userId": userid,
+            "chartName": chart_name
+        }
+        response = requests.post(API_URL, headers=headers, json=payload)
+
+        if response.status_code == 200:
+            with open(chart_filepath, "w") as f:
+                f.write(response.text)
+        else:
+            # Handle the error by returning an error response
+            return {'error': 'An error occurred while fetching the chart.'}
+
+    # Return the chart file path in the response
+    return {'filepath': chart_filepath}
 
 
 

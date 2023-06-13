@@ -256,11 +256,17 @@ header {
   box-shadow: 3px 3px 10px rgb(188, 188, 188);
   padding: 0px 20px;
   display: flex;
+  flex-direction: column; /* stack the div containers vertically */
   justify-content: center; /* horizontally center the heatmap container */
   align-items: center; /* vertically center the heatmap container */
 }
 
 #heatmap-container {
+  width: 100%; /* adjust the width as needed */
+  height: 100%; /* adjust the height as needed */
+}
+
+#timed-heatmap-container {
   width: 100%; /* adjust the width as needed */
   height: 100%; /* adjust the height as needed */
 }
