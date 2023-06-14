@@ -11,28 +11,29 @@ $(document).ready(function() {
     $("#heatmap-container").text("Loading heatmap...");
 
     // Fetch the heatmap using AJAX
+
     $.ajax({
       url: "/fetch_chart",
       type: "POST",
       data: JSON.stringify({ chartName: 'heatmap' }),
       contentType: "application/json",
       success: function(data) {
-        if (data.filepath) {
-          // Replace the loading message with the heatmap file
-          $("#heatmap-container").html('<iframe src="' + data.filepath + '"></iframe>');
+        if (data.success) {
+          if (data.filepath) {
+            // Replace the loading message with the heatmap file
+            $("#heatmap-container").html('<iframe src="' + data.filepath + '"></iframe>');
+          } else {
+            // Display an error message if the response is invalid
+            $("#heatmap-container").html('<p class="error-message">Invalid response received for heatmap.</p>');
+          }
         } else {
-          // Display an error message if the response is invalid
-          $("#heatmap-container").html('<p class="error-message">Invalid response received for heatmap.</p>');
+          // Display a generic error message for server-side errors
+          $("#heatmap-container").html('<p class="error-message">An error occurred while fetching the heatmap.</p>');
         }
       },
       error: function(xhr, status, error) {
-        if (xhr.responseJSON && xhr.responseJSON.error) {
-          // Display the specific error message for API request failure
-          $("#heatmap-container").html('<p class="error-message">Error is: ' + xhr.responseJSON.error + '</p>');
-        } else {
-          // Display a generic error message for other errors
-          $("#heatmap-container").html('<p class="error-message">An error occurred while fetching the heatmap.</p>');
-        }
+        // Display a generic error message for client-side errors
+        $("#heatmap-container").html('<p class="error-message">An error occurred while making the request.</p>');
       }
     });
   {% endif %}
@@ -48,22 +49,22 @@ $(document).ready(function() {
       data: JSON.stringify({ chartName: 'timed_heatmap' }),
       contentType: "application/json",
       success: function(data) {
-        if (data.filepath) {
-          // Replace the loading message with the timed heatmap file
-          $("#timed-heatmap-container").html('<iframe src="' + data.filepath + '"></iframe>');
+        if (data.success) {
+          if (data.filepath) {
+            // Replace the loading message with the heatmap file
+            $("#timed-heatmap-container").html('<iframe src="' + data.filepath + '"></iframe>');
+          } else {
+            // Display an error message if the response is invalid
+            $("#timed-heatmap-container").html('<p class="error-message">Invalid response received for timed heatmap.</p>');
+          }
         } else {
-          // Display an error message if the response is invalid
-          $("#timed-heatmap-container").html('<p class="error-message">Invalid response received for timed heatmap.</p>');
+          // Display a generic error message for server-side errors
+          $("#timed-heatmap-container").html('<p class="error-message">An error occurred while fetching the timed heatmap.</p>');
         }
       },
       error: function(xhr, status, error) {
-        if (xhr.responseJSON && xhr.responseJSON.error) {
-          // Display the specific error message for API request failure
-          $("#timed-heatmap-container").html('<p class="error-message">Error is: ' + xhr.responseJSON.error + '</p>');
-        } else {
-          // Display a generic error message for other errors
-          $("#timed-heatmap-container").html('<p class="error-message">An error occurred while fetching the timed heatmap.</p>');
-        }
+        // Display a generic error message for client-side errors
+        $("#timed-heatmap-container").html('<p class="error-message">An error occurred while making the request.</p>');
       }
     });
   {% endif %}
@@ -102,55 +103,6 @@ $(document).ready(function() {
         </nav>
     </div>
     <div class="main">
-
-        
-
-        <div class="box-container">
-
-            <div class="box box1">
-                <div class="text">
-                    <h2 class="topic-heading">60.5k</h2>
-                    <h2 class="topic">Article Views</h2>
-                </div>
-
-                <img src=
-"https://media.geeksforgeeks.org/wp-content/uploads/20221210184645/Untitled-design-(31).png"
-                    alt="Views">
-            </div>
-
-            <div class="box box2">
-                <div class="text">
-                    <h2 class="topic-heading">150</h2>
-                    <h2 class="topic">Likes</h2>
-                </div>
-
-                <img src=
-"https://media.geeksforgeeks.org/wp-content/uploads/20221210185030/14.png"
-                    alt="likes">
-            </div>
-
-            <div class="box box3">
-                <div class="text">
-                    <h2 class="topic-heading">320</h2>
-                    <h2 class="topic">Comments</h2>
-                </div>
-
-                <img src=
-"https://media.geeksforgeeks.org/wp-content/uploads/20221210184645/Untitled-design-(32).png"
-                    alt="comments">
-            </div>
-
-            <div class="box box4">
-                <div class="text">
-                    <h2 class="topic-heading">70</h2>
-                    <h2 class="topic">Published</h2>
-                </div>
-
-                <img src=
-"https://media.geeksforgeeks.org/wp-content/uploads/20221210185029/13.png" alt="published">
-            </div>
-        </div>
-
         <div class="report-container">
             <div id="heatmap-container">
                 {% if heatmap_file %}

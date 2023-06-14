@@ -121,7 +121,7 @@ def fetch_chart():
 
     if not os.path.exists(chart_filepath):
         access_token = session.get('access_token')
-        
+
         headers = {
             'Authorization': 'Bearer ' + access_token,
             'Accept': 'application/json',
@@ -135,13 +135,15 @@ def fetch_chart():
 
         if response.status_code == 200:
             with open(chart_filepath, "w") as f:
-                f.write(response.text)
+                f.write(response.text.replace('{"status":"OK"}', ''))
         else:
+            data = response.json()
+            status = data.get('status')
             # Handle the error by returning an error response
-            return {'error': 'An error occurred while fetching the chart.'}
+            return {'success': False, 'error': f'{status}'}
 
-    # Return the chart file path in the response
-    return {'filepath': chart_filepath}
+    # Return the success response with chart file path
+    return {'success': True, 'filepath': chart_filepath}
 
 
 

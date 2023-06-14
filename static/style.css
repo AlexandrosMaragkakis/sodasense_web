@@ -103,9 +103,9 @@ header {
   display: flex;
   width: 100%;
   position: relative;
-  top: 70px;
+  
   z-index: 1;
-  height: 100%;
+  
 }
 
 .dpicn {
@@ -249,12 +249,12 @@ header {
 
 .report-container {
   min-height: 50vw;
-  max-width: 1400px;
-  margin: 70px auto 0px auto;
+  max-width: 67vw;
+  margin: 1vw 1vw 1vw 1vw;
   background-color: #ffffff;
   border-radius: 30px;
   box-shadow: 3px 3px 10px rgb(188, 188, 188);
-  padding: 0px 20px;
+  padding: 0px 0px;
   display: flex;
   flex-direction: column; /* stack the div containers vertically */
   justify-content: center; /* horizontally center the heatmap container */
@@ -335,4 +335,34 @@ header {
   background-color: rgb(0, 177, 0);
   color: white;
   border-radius: 4px;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+form {
+  width: 300px;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
 }
