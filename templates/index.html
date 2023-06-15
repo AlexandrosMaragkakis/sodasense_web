@@ -2,73 +2,161 @@
 
 {% block content %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
 
 <script>
     
-$(document).ready(function() {
-  {% if load_heatmap %}
-    // Show loading message for heatmap
-    $("#heatmap-container").text("Loading heatmap...");
+  $(document).ready(function() {
 
     // Fetch the heatmap using AJAX
+    {% if load_heatmap %}
+      // Show loading message for heatmap
+      // Get the current date as the default date selection
+      var currentDate = moment().format('DD/MM/YYYY');
 
-    $.ajax({
-      url: "/fetch_chart",
-      type: "POST",
-      data: JSON.stringify({ chartName: 'heatmap' }),
-      contentType: "application/json",
-      success: function(data) {
-        if (data.success) {
-          if (data.filepath) {
-            // Replace the loading message with the heatmap file
-            $("#heatmap-container").html('<iframe src="' + data.filepath + '"></iframe>');
+      $.ajax({
+        url: "/fetch_chart",
+        type: "POST",
+        data: JSON.stringify({
+          chartName: 'heatmap',
+          startTimestamp: convertToUnixTimestamp(moment(currentDate, 'DD/MM/YYYY').startOf('day')),
+          endTimestamp: convertToUnixTimestamp(moment(currentDate, 'DD/MM/YYYY').endOf('day'))
+        }),
+        contentType: "application/json",
+        success: function(data) {
+          if (data.success) {
+            if (data.filepath) {
+              // Replace the loading message with the heatmap file
+              $("#heatmap-container").html('<iframe src="' + data.filepath + '"></iframe>');
+            } else {
+              // Display an error message if the response is invalid
+              
+              $("#heatmap-container").html('<p class="error-message">Invalid response received for heatmap.</p>');
+            }
           } else {
-            // Display an error message if the response is invalid
-            $("#heatmap-container").html('<p class="error-message">Invalid response received for heatmap.</p>');
+            // Display a generic error message for server-side errors
+            console.log(data)
+            $("#heatmap-container").html('<p class="error-message">An error occurred while fetching the heatmap.</p>');
           }
-        } else {
-          // Display a generic error message for server-side errors
-          $("#heatmap-container").html('<p class="error-message">An error occurred while fetching the heatmap.</p>');
+        },
+        error: function(xhr, status, error) {
+          // Display a generic error message for client-side errors
+          $("#heatmap-container").html('<p class="error-message">An error occurred while making the request.</p>');
         }
-      },
-      error: function(xhr, status, error) {
-        // Display a generic error message for client-side errors
-        $("#heatmap-container").html('<p class="error-message">An error occurred while making the request.</p>');
-      }
+      });
+    {% endif %}
+
+    
+
+    $('#selectRangeBtn').click(function() {
+      $(this).addClass('active');
+      $('#rangePickerContainer').html('<input type="text" id="dateRangePicker">');
+
+      // Initialize date range picker
+      $('#dateRangePicker').daterangepicker({
+        opens: 'left',
+        startDate: moment().subtract(7, 'days'),
+        endDate: moment(),
+        ranges: {
+          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+          'This Month': [moment().startOf('month'), moment().endOf('month')]
+        },
+        locale: {
+          format: 'DD/MM/YYYY'
+        }
+      });
+
+      // Remove 'active' class from the other button
+      $('#selectSingleDateBtn').removeClass('active');
+      $('#singleDatePickerContainer').empty();
     });
-  {% endif %}
 
-  {% if load_timed_heatmap %}
-    // Show loading message for timed heatmap
-    $("#timed-heatmap-container").text("Loading timed heatmap...");
+    // Button for selecting a single date
+    $('#selectSingleDateBtn').click(function() {
+      $(this).addClass('active');
+      $('#singleDatePickerContainer').html('<input type="text" id="singleDatePicker">');
 
-    // Fetch the timed heatmap using AJAX
-    $.ajax({
-      url: "/fetch_chart",
-      type: "POST",
-      data: JSON.stringify({ chartName: 'timed_heatmap' }),
-      contentType: "application/json",
-      success: function(data) {
-        if (data.success) {
-          if (data.filepath) {
-            // Replace the loading message with the heatmap file
-            $("#timed-heatmap-container").html('<iframe src="' + data.filepath + '"></iframe>');
+      // Initialize single date picker
+      $('#singleDatePicker').daterangepicker({
+        singleDatePicker: true,
+        startDate: moment(),
+        locale: {
+          format: 'DD/MM/YYYY'
+        }
+      });
+
+      // Remove 'active' class from the other button
+      $('#selectRangeBtn').removeClass('active');
+      $('#rangePickerContainer').empty();
+    });
+
+
+
+    $('#submitBtn').click(function() {
+      // Retrieve the selected date or date range based on the active button
+      var selectedDate;
+      var isRangeSelected = $('#selectRangeBtn').hasClass('active');
+
+      if (isRangeSelected) {
+        selectedDate = {
+          startDate: $('#dateRangePicker').data('daterangepicker').startDate.format('DD/MM/YYYY'),
+          endDate: $('#dateRangePicker').data('daterangepicker').endDate.format('DD/MM/YYYY')
+        };
+      } else {
+        var singleDate = $('#singleDatePicker').data('daterangepicker').startDate;
+        selectedDate = {
+          startDate: singleDate.clone().startOf('day'),
+          endDate: singleDate.clone().endOf('day')
+        };
+      }
+
+      var startTimestamp = convertToUnixTimestamp(selectedDate.startDate);
+      var endTimestamp = convertToUnixTimestamp(selectedDate.endDate);
+
+      // Make the AJAX request with the selected date or date range
+      $.ajax({
+        url: "/fetch_chart",
+        type: "POST",
+        data: JSON.stringify({
+          chartName: 'heatmap',
+          startTimestamp: startTimestamp,
+          endTimestamp: endTimestamp
+        }),
+        contentType: "application/json",
+        success: function(data) {
+          // Handle success response
+          if (data.success) {
+            if (data.filepath) {
+              // Replace the chart container with the new chart file
+              $("#heatmap-container").html('<iframe src="' + data.filepath + '"></iframe>');
+            } else {
+              // Display an error message if the response is invalid
+              $("#heatmap-container").html('<p class="error-message">Invalid response received for heatmap.</p>');
+            }
           } else {
-            // Display an error message if the response is invalid
-            $("#timed-heatmap-container").html('<p class="error-message">Invalid response received for timed heatmap.</p>');
+            // Display a generic error message for server-side errors
+            $("#heatmap-container").html('<p class="error-message">An error occurred while fetching the heatmap.</p>');
           }
-        } else {
-          // Display a generic error message for server-side errors
-          $("#timed-heatmap-container").html('<p class="error-message">An error occurred while fetching the timed heatmap.</p>');
+        },
+        error: function(xhr, status, error) {
+          // Display a generic error message for client-side errors
+          $("#heatmap-container").html('<p class="error-message">An error occurred while making the request.</p>');
         }
-      },
-      error: function(xhr, status, error) {
-        // Display a generic error message for client-side errors
-        $("#timed-heatmap-container").html('<p class="error-message">An error occurred while making the request.</p>');
-      }
+      });
     });
-  {% endif %}
-});
+
+  function convertToUnixTimestamp(date) {
+    // Convert the date string in format 'DD/MM/YYYY' to Unix timestamp (in seconds)
+    var momentDate = moment(date, 'DD/MM/YYYY');
+    return momentDate.unix();
+  }
+
+
+  });
 
 </script>
   
@@ -104,19 +192,34 @@ $(document).ready(function() {
     </div>
     <div class="main">
         <div class="report-container">
-            <div id="heatmap-container">
-                {% if heatmap_file %}
-                  <iframe src="{{ heatmap_file }}"></iframe>
-                {% endif %}
+
+          <!-- (START) SELECT TIME RANGE -->
+          <div class="dates-container">
+            <div class="buttons">
+              <button id="selectRangeBtn" class="active">Select time range</button>
+              <button id="selectSingleDateBtn" class="active">Select a single date</button>
             </div>
-            <div id="timed-heatmap-container">
-                {% if timed_heatmap_file %}
-                  <iframe src="{{ timed_heatmap_file }}"></iframe>
-                {% endif %}
+            <div id="rangePickerContainer" class="range-picker-container">
+              <!-- The date range picker will be dynamically inserted here -->
             </div>
-            <!-- <iframe src="plotly_graph.html"></iframe>-->
+            <div id="singleDatePickerContainer" class="range-picker-container">
+              <!-- The date range picker will be dynamically inserted here -->
+            </div>
+            <div class="submit-container">
+              <button id="submitBtn">Submit</button>
+            </div>
+          </div>
+          <!-- (END) SELECT TIME RANGE -->
+
+          <div id="heatmap-container">
+              {% if heatmap_file %}
+                <iframe src="{{ heatmap_file }}"></iframe>
+              {% endif %}
+          </div>         
             
         </div>
+
+        
     </div>
 </div>
 
