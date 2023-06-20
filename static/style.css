@@ -365,3 +365,31 @@ button[type="submit"] {
   font-size: 14px;
   margin-top: 5px;
 }
+
+.dates-container {
+  width: 300px;
+  
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+button.active {
+  background-color: #ccc;
+}
+
+.range-picker-container {
+  margin-top: 10px;
+}
+
