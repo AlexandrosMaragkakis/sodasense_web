@@ -1,0 +1,38 @@
+Query execution time: 0.4051096439361572 seconds
+Lists execution time: 0.0007688999176025391 seconds
+Number of points: 369
+Routes identification time: 0.0015392303466796875 seconds
+Chart drawing time: 0.5953540802001953 seconds
+Total execution time: 1.0066606998443604 seconds
+
+
+Query execution time: 1.5880827903747559 seconds
+Lists execution time: 0.001989126205444336 seconds
+Number of points: 1440
+Routes identification time: 0.004239320755004883 seconds
+Chart drawing time: 2.262310743331909 seconds
+Total execution time: 3.8605093955993652 seconds
+
+
+Query execution time: 0.7508249282836914 seconds
+Lists execution time: 0.0021347999572753906 seconds
+Number of points: 1547
+Routes identification time: 0.0045948028564453125 seconds
+Chart drawing time: 2.441959857940674 seconds
+Total execution time: 3.2033743858337402 seconds
+
+
+Query execution time: 4.338832139968872 seconds
+Lists execution time: 0.009603023529052734 seconds
+Number of points: 5760
+Routes identification time: 0.017600059509277344 seconds
+Chart drawing time: 9.275746583938599 seconds
+Total execution time: 13.645822286605835 seconds
+
+
+Query execution time: 20.003109455108643 seconds
+Lists execution time: 0.09018826484680176 seconds
+Number of points: 43200
+Routes identification time: 0.1380445957183838 seconds
+Chart drawing time: 68.3800482749939 seconds
+Total execution time: 88.61574053764343 seconds

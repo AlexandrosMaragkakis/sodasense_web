@@ -1,7 +1,7 @@
 # Import flask and other modules
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 import requests
 import json
 import base64
@@ -12,6 +12,9 @@ API_URL = 'http://192.168.48.222/fake-api/dashboard_services/charts.php'
 
 # Create an app instance
 app = Flask(__name__)
+
+# Set the session timeout to 1 hour (3600 seconds)
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600
 
 # Configure a secret key for the app
 app.secret_key = 'secret'
@@ -113,20 +116,13 @@ def login():
 @login_required
 def index():
     """
-    Renders the index.html page with a heatmap if it exists or if it doesn't, a request is made to load it.
+    A view function that is responsible for rendering the index.html template. 
+    It is decorated with the route '/' and the login_required decorator to 
+    ensure that only authenticated users can access it. 
 
-    Returns:
-        HTML Template: The index.html page with or without a heatmap.
+    The function does not take any parameters and returns the rendered index.html template.
     """
-    # Create filepath to the user's heatmap
-    heatmap_filepath = f"static/tmp/{session['userid']}_heatmap.html"
-
-    # If the heatmap file does not exist, inform the HTML template to load it
-    if not os.path.exists(heatmap_filepath):
-        return render_template('index.html', load_heatmap=True)
-    # If the heatmap file exists, render the HTML template with the file path
-    else:
-        return render_template('index.html', heatmap_file=heatmap_filepath)
+    return render_template('index.html')
 
 
 @app.route('/fetch_chart', methods=['POST'])
