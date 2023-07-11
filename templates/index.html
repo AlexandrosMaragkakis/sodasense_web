@@ -21,7 +21,7 @@
       url: "/fetch_chart",
       type: "POST",
       data: JSON.stringify({
-        chartName: 'routes',
+        chartName: 'routes_test',
         startTimestamp: convertToUnixTimestamp(moment(currentDate, 'DD/MM/YYYY').startOf('day')),
         endTimestamp: convertToUnixTimestamp(moment(currentDate, 'DD/MM/YYYY').endOf('day'))
       }),
@@ -122,7 +122,7 @@
         url: "/fetch_chart",
         type: "POST",
         data: JSON.stringify({
-          chartName: 'routes',
+          chartName: 'routes_test',
           startTimestamp: startTimestamp,
           endTimestamp: endTimestamp
         }),
