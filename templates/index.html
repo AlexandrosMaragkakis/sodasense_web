@@ -30,6 +30,9 @@
         opens: 'left',
         startDate: moment().subtract(7, 'days'),
         endDate: moment(),
+        maxSpan: {
+          days: 31
+        },
         ranges: {
           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
