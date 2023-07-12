@@ -13,12 +13,18 @@
   
     // Function to show the loading spinner
     function showLoadingSpinner() {
-      $('#chart-container').html('<div class="loading-spinner"></div>');
+      $('#accelerometer-chart-container').html('<div class="loading-spinner"></div>');
+      $('#magnetometer-chart-container').html('<div class="loading-spinner"></div>');
+      $('#gyroscope-chart-container').html('<div class="loading-spinner"></div>');
+      $('#proximity-chart-container').html('<div class="loading-spinner"></div>');
     }
 
     // Function to hide the loading spinner
     function hideLoadingSpinner() {
-      $('#chart-container').find('.loading-spinner').remove();
+      $('#accelerometer-chart-container').find('.loading-spinner').remove();
+      $('#magnetometer-chart-container').find('.loading-spinner').remove();
+      $('#gyroscope-chart-container').find('.loading-spinner').remove();
+      $('#proximity-chart-container').find('.loading-spinner').remove();
     }
 
     $('#selectRangeBtn').click(function() {
@@ -132,27 +138,30 @@
     }
   });
   
-</script>
+  </script>
+  
+  
+  
 
+  
 <div class="main-container">
     <div class="navcontainer">
         <nav class="nav">
             <div class="nav-upper-options">
-                <div class="nav-option active">
+                <div class="nav-option">
                     <a href="/">
                       <h3>Routes</h3>
                     </a>
                 </div>
-                <div class="nav-option">
-                        
+                <div class="nav-option active">
                   <a href="/sensors">
                       <h3>Sensors</h3>
                   </a>
                 </div>
-                <div class="nav-option">
-                    <a href="/logout">
-                        <h3>Logout</h3>
-                    </a>
+                <div class="nav-option ">
+                        <a href="/logout">
+                            <h3>Logout</h3>
+                        </a>
                 </div>
             </div>
         </nav>
@@ -160,29 +169,44 @@
     <div class="main">
         <div class="report-container">
 
-          <!-- (START) SELECT TIME RANGE -->
-          <div class="dates-container">
-            <div class="buttons">
-              <button id="selectRangeBtn" class="active">Select time range</button>
-              <button id="selectSingleDateBtn" class="active">Select a single date</button>
+            <!-- (START) SELECT TIME RANGE -->
+            <div class="dates-container">
+                <div class="buttons">
+                <button id="selectRangeBtn" class="active">Select time range</button>
+                <button id="selectSingleDateBtn" class="active">Select a single date</button>
+                </div>
+                <div id="rangePickerContainer" class="range-picker-container">
+                <!-- The date range picker will be dynamically inserted here -->
+                </div>
+                <div id="singleDatePickerContainer" class="range-picker-container">
+                <!-- The date range picker will be dynamically inserted here -->
+                </div>
+                <div class="submit-container">
+                <button id="submitBtn">Submit</button>
+                </div>
             </div>
-            <div id="rangePickerContainer" class="range-picker-container">
-              <!-- The date range picker will be dynamically inserted here -->
-            </div>
-            <div id="singleDatePickerContainer" class="range-picker-container">
-              <!-- The date range picker will be dynamically inserted here -->
-            </div>
-            <div class="submit-container">
-              <button id="submitBtn">Submit</button>
-            </div>
-          </div>
-          <!-- (END) SELECT TIME RANGE -->
+            <!-- (END) SELECT TIME RANGE -->
 
-          <div id="chart-container">
-              
+            <div id="accelerometer-chart-container">
+                
+                    <iframe src=""></iframe>
+                
+            </div>
+            <div id="magnetometer-chart-container">
+                
                 <iframe src=""></iframe>
-              
-          </div>         
+                    
+            </div> 
+            <div id="gyroscope-chart-container">
+                        
+                <iframe src=""></iframe>
+                
+            </div> 
+            <div id="proximity-chart-container">
+                        
+                <iframe src=""></iframe>
+            
+            </div>     
             
         </div>
 

@@ -190,6 +190,13 @@ header {
   gap: 30px;
 }
 
+.nav-option.active {
+  /* Add your styles for the active state here */
+  background-color: #cad7fda4; /* Example background color */
+  font-weight: bold; /* Example font weight */
+  /* Add any other styles you want to apply */
+}
+
 .option1 {
   border-left: 5px solid #010058af;
   background-color: var(--Border-color);
@@ -408,4 +415,9 @@ button.active {
   100% {
     transform: rotate(360deg);
   }
+}
+
+a {
+  color: inherit; /* Keeps the default color */
+  text-decoration: none; /* Removes the underline */
 }

@@ -105,11 +105,9 @@ def login():
         else:
             return render_template('login.html', error='Invalid credentials.')
 
-    # Returning the login page for GET requests
+    # Returning the login page for GET requestsΠ
     else:
         return render_template('login.html')
-
-# Define a route for the index page
 
 
 @app.route('/')
@@ -123,6 +121,19 @@ def index():
     The function does not take any parameters and returns the rendered index.html template.
     """
     return render_template('index.html')
+
+
+@app.route('/sensors')
+@login_required
+def sensors():
+    """
+    A view function that is responsible for rendering the sensors.html template. 
+    It is decorated with the route '/sensors' and the login_required decorator to 
+    ensure that only authenticated users can access it. 
+
+    The function does not take any parameters and returns the rendered sensors.html template.
+    """
+    return render_template('sensors.html')
 
 
 @app.route('/fetch_chart', methods=['POST'])
