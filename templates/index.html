@@ -8,53 +8,23 @@
 
 
 <script>
-    
+
   $(document).ready(function() {
+  
+    // Function to show the loading spinner
+    function showLoadingSpinner() {
+      $('#chart-container').html('<div class="loading-spinner"></div>');
+    }
 
-    // Fetch the heatmap using AJAX
-    
-    // Show loading message for heatmap
-    // Get the current date as the default date selection
-    var currentDate = moment().format('DD/MM/YYYY');
-
-    $.ajax({
-      url: "/fetch_chart",
-      type: "POST",
-      data: JSON.stringify({
-        chartName: 'routes_test',
-        startTimestamp: convertToUnixTimestamp(moment(currentDate, 'DD/MM/YYYY').startOf('day')),
-        endTimestamp: convertToUnixTimestamp(moment(currentDate, 'DD/MM/YYYY').endOf('day'))
-      }),
-      contentType: "application/json",
-      success: function(data) {
-        if (data.success) {
-          if (data.filepath) {
-            // Replace the loading message with the heatmap file
-            $("#chart-container").html('<iframe src="' + data.filepath + '"></iframe>');
-          } else {
-            // Display an error message if the response is invalid
-
-            $("#chart-container").html('<p class="error-message">Invalid response received for heatmap.</p>');
-          }
-        } else {
-          // Display a generic error message for server-side errors
-          console.log(data)
-          $("#chart-container").html('<p class="error-message">You don\'t have any data to display.</p>');
-        }
-      },
-      error: function(xhr, status, error) {
-        // Display a generic error message for client-side errors
-        $("#chart-container").html('<p class="error-message">An error occurred while making the request.</p>');
-      }
-    });
-    
-
-    
+    // Function to hide the loading spinner
+    function hideLoadingSpinner() {
+      $('#chart-container').find('.loading-spinner').remove();
+    }
 
     $('#selectRangeBtn').click(function() {
       $(this).addClass('active');
       $('#rangePickerContainer').html('<input type="text" id="dateRangePicker">');
-
+  
       // Initialize date range picker
       $('#dateRangePicker').daterangepicker({
         opens: 'left',
@@ -69,17 +39,17 @@
           format: 'DD/MM/YYYY'
         }
       });
-
+  
       // Remove 'active' class from the other button
       $('#selectSingleDateBtn').removeClass('active');
       $('#singleDatePickerContainer').empty();
     });
-
+  
     // Button for selecting a single date
     $('#selectSingleDateBtn').click(function() {
       $(this).addClass('active');
       $('#singleDatePickerContainer').html('<input type="text" id="singleDatePicker">');
-
+  
       // Initialize single date picker
       $('#singleDatePicker').daterangepicker({
         singleDatePicker: true,
@@ -88,19 +58,20 @@
           format: 'DD/MM/YYYY'
         }
       });
-
+  
       // Remove 'active' class from the other button
       $('#selectRangeBtn').removeClass('active');
       $('#rangePickerContainer').empty();
     });
-
-
-
+  
     $('#submitBtn').click(function() {
+
+      showLoadingSpinner();
+
       // Retrieve the selected date or date range based on the active button
       var selectedDate;
       var isRangeSelected = $('#selectRangeBtn').hasClass('active');
-
+  
       if (isRangeSelected) {
         selectedDate = {
           startDate: $('#dateRangePicker').data('daterangepicker').startDate.format('DD/MM/YYYY'),
@@ -113,10 +84,10 @@
           endDate: singleDate.clone().endOf('day')
         };
       }
-
-      var startTimestamp = convertToUnixTimestamp(selectedDate.startDate);
-      var endTimestamp = convertToUnixTimestamp(selectedDate.endDate);
-
+  
+      var startTimestamp = getUnixTimestamp(selectedDate.startDate);
+      var endTimestamp = getUnixTimestamp(selectedDate.endDate);
+  
       // Make the AJAX request with the selected date or date range
       $.ajax({
         url: "/fetch_chart",
@@ -128,6 +99,7 @@
         }),
         contentType: "application/json",
         success: function(data) {
+          hideLoadingSpinner();
           // Handle success response
           if (data.success) {
             if (data.filepath) {
@@ -143,22 +115,22 @@
           }
         },
         error: function(xhr, status, error) {
+          hideLoadingSpinner();
           // Display a generic error message for client-side errors
           $("#chart-container").html('<p class="error-message">An error occurred while making the request.</p>');
         }
       });
     });
-
-  function convertToUnixTimestamp(date) {
-    // Convert the date string in format 'DD/MM/YYYY' to Unix timestamp (in seconds)
-    var momentDate = moment(date, 'DD/MM/YYYY');
-    return momentDate.unix();
-  }
-
-
+  
+    function getUnixTimestamp(date) {
+      // Convert the date string in format 'DD/MM/YYYY' to Unix timestamp (in seconds)
+      var momentDate = moment(date, 'DD/MM/YYYY');
+      return momentDate.unix();
+    }
   });
-
-</script>
+  
+  </script>
+  
   
   
 
