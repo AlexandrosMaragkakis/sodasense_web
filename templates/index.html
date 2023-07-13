@@ -69,7 +69,7 @@
   
     $('#submitBtn').click(function() {
 
-      showLoadingSpinner();
+      
 
       // Retrieve the selected date or date range based on the active button
       var selectedDate;
@@ -87,7 +87,9 @@
           endDate: singleDate.clone().endOf('day')
         };
       }
-  
+      
+      showLoadingSpinner();
+      
       var startTimestamp = getUnixTimestamp(selectedDate.startDate);
       var endTimestamp = getUnixTimestamp(selectedDate.endDate);
   
@@ -96,7 +98,7 @@
         url: "/fetch_chart",
         type: "POST",
         data: JSON.stringify({
-          chartName: 'routes_test',
+          chartName: 'routes',
           startTimestamp: startTimestamp,
           endTimestamp: endTimestamp
         }),
