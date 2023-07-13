@@ -8,23 +8,24 @@
 
 
 <script>
-
   $(document).ready(function() {
   
     // Function to show the loading spinner
     function showLoadingSpinner() {
-      $('#accelerometer-chart-container').html('<div class="loading-spinner"></div>');
-      $('#magnetometer-chart-container').html('<div class="loading-spinner"></div>');
-      $('#gyroscope-chart-container').html('<div class="loading-spinner"></div>');
-      $('#proximity-chart-container').html('<div class="loading-spinner"></div>');
+      $('#accelerometer-container').html('<div class="loading-spinner"></div>');
+      $('#magnetometer-container').html('<div class="loading-spinner"></div>');
+      $('#gyroscope-container').html('<div class="loading-spinner"></div>');
+      $('#proximity-container').html('<div class="loading-spinner"></div>');
+      $('#pressure-container').html('<div class="loading-spinner"></div>');
     }
 
     // Function to hide the loading spinner
     function hideLoadingSpinner() {
-      $('#accelerometer-chart-container').find('.loading-spinner').remove();
-      $('#magnetometer-chart-container').find('.loading-spinner').remove();
-      $('#gyroscope-chart-container').find('.loading-spinner').remove();
-      $('#proximity-chart-container').find('.loading-spinner').remove();
+      $('#accelerometer-container').find('.loading-spinner').remove();
+      $('#magnetometer-container').find('.loading-spinner').remove();
+      $('#gyroscope-container').find('.loading-spinner').remove();
+      $('#proximity-container').find('.loading-spinner').remove();
+      $('#pressure-container').find('.loading-spinner').remove();
     }
 
     $('#selectRangeBtn').click(function() {
@@ -74,13 +75,18 @@
     });
   
     $('#submitBtn').click(function() {
-
-      
+      var charts = [
+        { name: 'accelerometer', container: '#accelerometer-container' },
+        { name: 'magnetometer', container: '#magnetometer-container' },
+        { name: 'gyroscope', container: '#gyroscope-container' },
+        { name: 'proximity', container: '#proximity-container' },
+        { name: 'pressure', container: '#pressure-container' }
+      ]; // Array of chart names and corresponding containers
 
       // Retrieve the selected date or date range based on the active button
       var selectedDate;
       var isRangeSelected = $('#selectRangeBtn').hasClass('active');
-  
+
       if (isRangeSelected) {
         selectedDate = {
           startDate: $('#dateRangePicker').data('daterangepicker').startDate.format('DD/MM/YYYY'),
@@ -93,56 +99,58 @@
           endDate: singleDate.clone().endOf('day')
         };
       }
+
       showLoadingSpinner();
+
       var startTimestamp = getUnixTimestamp(selectedDate.startDate);
       var endTimestamp = getUnixTimestamp(selectedDate.endDate);
-  
-      // Make the AJAX request with the selected date or date range
-      $.ajax({
-        url: "/fetch_chart",
-        type: "POST",
-        data: JSON.stringify({
-          chartName: 'elamoude',
-          startTimestamp: startTimestamp,
-          endTimestamp: endTimestamp
-        }),
-        contentType: "application/json",
-        success: function(data) {
-          hideLoadingSpinner();
-          // Handle success response
-          if (data.success) {
-            if (data.filepath) {
-              // Replace the chart container with the new chart file
-              $("#chart-container").html('<iframe src="' + data.filepath + '"></iframe>');
+
+      // Loop through the array of charts
+      charts.forEach(function(chart) {
+        // Make the AJAX request with the selected date or date range
+        $.ajax({
+          url: "/fetch_chart",
+          type: "POST",
+          data: JSON.stringify({
+            chartName: chart.name,
+            startTimestamp: startTimestamp,
+            endTimestamp: endTimestamp
+          }),
+          contentType: "application/json",
+          success: function(data) {
+            // Handle success response
+            if (data.success) {
+              if (data.filepath) {
+                // Replace the chart container with the new chart file
+                $(chart.container).html('<iframe src="' + data.filepath + '"></iframe>');
+              } else {
+                // Display an error message if the response is invalid
+                $(chart.container).html('<p class="error-message">Invalid response received for ' + chart.name + '.</p>');
+              }
             } else {
-              // Display an error message if the response is invalid
-              $("#chart-container").html('<p class="error-message">Invalid response received for heatmap.</p>');
+              // Display a generic error message for server-side errors
+              $(chart.container).html('<p class="error-message">No data available for ' + chart.name + '.</p>');
             }
-          } else {
-            // Display a generic error message for server-side errors
-            $("#chart-container").html('<p class="error-message">You don\'t have any data to display.</p>');
+          },
+          error: function(xhr, status, error) {
+            // Display a generic error message for client-side errors
+            $(chart.container).html('<p class="error-message">An error occurred while making the request for ' + chart.name + '.</p>');
+          },
+          complete: function() {
+            // Hide the loading spinner when all requests are complete
+            hideLoadingSpinner();
           }
-        },
-        error: function(xhr, status, error) {
-          hideLoadingSpinner();
-          // Display a generic error message for client-side errors
-          $("#chart-container").html('<p class="error-message">An error occurred while making the request.</p>');
-        }
+        });
       });
     });
-  
+
     function getUnixTimestamp(date) {
       // Convert the date string in format 'DD/MM/YYYY' to Unix timestamp (in seconds)
       var momentDate = moment(date, 'DD/MM/YYYY');
       return momentDate.unix();
     }
-  });
-  
-  </script>
-  
-  
-  
-
+});  
+</script>
   
 <div class="main-container">
     <div class="navcontainer">
@@ -168,7 +176,6 @@
     </div>
     <div class="main">
         <div class="report-container">
-
             <!-- (START) SELECT TIME RANGE -->
             <div class="dates-container">
                 <div class="buttons">
@@ -187,30 +194,22 @@
             </div>
             <!-- (END) SELECT TIME RANGE -->
 
-            <div id="accelerometer-chart-container">
-                
+            <div id="accelerometer-container">
                     <iframe src=""></iframe>
-                
             </div>
-            <div id="magnetometer-chart-container">
-                
+            <div id="magnetometer-container">
                 <iframe src=""></iframe>
-                    
             </div> 
-            <div id="gyroscope-chart-container">
-                        
+            <div id="gyroscope-container">
                 <iframe src=""></iframe>
-                
             </div> 
-            <div id="proximity-chart-container">
-                        
+            <div id="proximity-container">     
                 <iframe src=""></iframe>
-            
-            </div>     
-            
+            </div>   
+            <div id="pressure-container">
+              <iframe src=""></iframe>
+            </div>        
         </div>
-
-        
     </div>
 </div>
 

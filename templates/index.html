@@ -104,7 +104,6 @@
         }),
         contentType: "application/json",
         success: function(data) {
-          hideLoadingSpinner();
           // Handle success response
           if (data.success) {
             if (data.filepath) {
@@ -120,9 +119,13 @@
           }
         },
         error: function(xhr, status, error) {
-          hideLoadingSpinner();
+
           // Display a generic error message for client-side errors
           $("#chart-container").html('<p class="error-message">An error occurred while making the request.</p>');
+        },
+        complete: function() {
+          // Hide the loading spinner when all requests are complete
+          hideLoadingSpinner();
         }
       });
     });
