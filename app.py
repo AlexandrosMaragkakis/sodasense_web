@@ -193,20 +193,21 @@ def fetch_chart():
 @login_required
 def logout():
     """
-    Route to log out the user and remove their heatmap chart file.
+    Route to log out the user.
 
     Returns:
         redirect: Redirects to the login page.
     """
-    # Define the chart file path
-    chart_filepath = f"static/tmp/{session['userid']}_heatmap.html"
-
     # Log out the user
     logout_user()
 
-    # Remove the user's heatmap chart file if it exists
-    if os.path.exists(chart_filepath):
-        os.remove(chart_filepath)
+    # Delete all files in the static/tmp/ directory except for ".tmp"
+    directory = "static/tmp/"
+    for filename in os.listdir(directory):
+        if filename != ".tmp":
+            file_path = os.path.join(directory, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
 
     # Redirect to the login page
     return redirect(url_for('login'))
