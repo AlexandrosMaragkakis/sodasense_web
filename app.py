@@ -105,11 +105,9 @@ def login():
         else:
             return render_template('login.html', error='Invalid credentials.')
 
-    # Returning the login page for GET requests
+    # Returning the login page for GET requestsΠ
     else:
         return render_template('login.html')
-
-# Define a route for the index page
 
 
 @app.route('/')
@@ -123,6 +121,19 @@ def index():
     The function does not take any parameters and returns the rendered index.html template.
     """
     return render_template('index.html')
+
+
+@app.route('/sensors')
+@login_required
+def sensors():
+    """
+    A view function that is responsible for rendering the sensors.html template. 
+    It is decorated with the route '/sensors' and the login_required decorator to 
+    ensure that only authenticated users can access it. 
+
+    The function does not take any parameters and returns the rendered sensors.html template.
+    """
+    return render_template('sensors.html')
 
 
 @app.route('/fetch_chart', methods=['POST'])
@@ -182,20 +193,21 @@ def fetch_chart():
 @login_required
 def logout():
     """
-    Route to log out the user and remove their heatmap chart file.
+    Route to log out the user.
 
     Returns:
         redirect: Redirects to the login page.
     """
-    # Define the chart file path
-    chart_filepath = f"static/tmp/{session['userid']}_heatmap.html"
-
     # Log out the user
     logout_user()
 
-    # Remove the user's heatmap chart file if it exists
-    if os.path.exists(chart_filepath):
-        os.remove(chart_filepath)
+    # Delete all files in the static/tmp/ directory except for ".tmp"
+    directory = "static/tmp/"
+    for filename in os.listdir(directory):
+        if filename != ".tmp":
+            file_path = os.path.join(directory, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
 
     # Redirect to the login page
     return redirect(url_for('login'))

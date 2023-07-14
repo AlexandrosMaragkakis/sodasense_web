@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+
+<script>
+  $(document).ready(function() {
+  
+    // Function to show the loading spinner
+    function showLoadingSpinner() {
+      $('#accelerometer-container').html('<div class="loading-spinner"></div>');
+      $('#magnetometer-container').html('<div class="loading-spinner"></div>');
+      $('#gyroscope-container').html('<div class="loading-spinner"></div>');
+      $('#proximity-container').html('<div class="loading-spinner"></div>');
+      $('#pressure-container').html('<div class="loading-spinner"></div>');
+    }
+
+    // Function to hide the loading spinner
+    function hideLoadingSpinner() {
+      $('#accelerometer-container').find('.loading-spinner').remove();
+      $('#magnetometer-container').find('.loading-spinner').remove();
+      $('#gyroscope-container').find('.loading-spinner').remove();
+      $('#proximity-container').find('.loading-spinner').remove();
+      $('#pressure-container').find('.loading-spinner').remove();
+    }
+
+    $('#selectRangeBtn').click(function() {
+      $(this).addClass('active');
+      $('#rangePickerContainer').html('<input type="text" id="dateRangePicker">');
+  
+      // Initialize date range picker
+      $('#dateRangePicker').daterangepicker({
+        opens: 'left',
+        startDate: moment().subtract(7, 'days'),
+        endDate: moment(),
+        maxSpan: {
+          days: 31
+        },
+        ranges: {
+          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+          'This Month': [moment().startOf('month'), moment().endOf('month')]
+        },
+        locale: {
+          format: 'DD/MM/YYYY'
+        }
+      });
+  
+      // Remove 'active' class from the other button
+      $('#selectSingleDateBtn').removeClass('active');
+      $('#singleDatePickerContainer').empty();
+    });
+  
+    // Button for selecting a single date
+    $('#selectSingleDateBtn').click(function() {
+      $(this).addClass('active');
+      $('#singleDatePickerContainer').html('<input type="text" id="singleDatePicker">');
+  
+      // Initialize single date picker
+      $('#singleDatePicker').daterangepicker({
+        singleDatePicker: true,
+        startDate: moment(),
+        locale: {
+          format: 'DD/MM/YYYY'
+        }
+      });
+  
+      // Remove 'active' class from the other button
+      $('#selectRangeBtn').removeClass('active');
+      $('#rangePickerContainer').empty();
+    });
+  
+    $('#submitBtn').click(function() {
+      var charts = [
+        { name: 'accelerometer', container: '#accelerometer-container' },
+        { name: 'magnetometer', container: '#magnetometer-container' },
+        { name: 'gyroscope', container: '#gyroscope-container' },
+        { name: 'proximity', container: '#proximity-container' },
+        { name: 'pressure', container: '#pressure-container' }
+      ]; // Array of chart names and corresponding containers
+
+      // Retrieve the selected date or date range based on the active button
+      var selectedDate;
+      var isRangeSelected = $('#selectRangeBtn').hasClass('active');
+
+      if (isRangeSelected) {
+        selectedDate = {
+          startDate: $('#dateRangePicker').data('daterangepicker').startDate.format('DD/MM/YYYY'),
+          endDate: $('#dateRangePicker').data('daterangepicker').endDate.format('DD/MM/YYYY')
+        };
+      } else {
+        var singleDate = $('#singleDatePicker').data('daterangepicker').startDate;
+        selectedDate = {
+          startDate: singleDate.clone().startOf('day'),
+          endDate: singleDate.clone().endOf('day')
+        };
+      }
+
+      showLoadingSpinner();
+
+      var startTimestamp = getUnixTimestamp(selectedDate.startDate);
+      var endTimestamp = getUnixTimestamp(selectedDate.endDate);
+
+      // Loop through the array of charts
+      charts.forEach(function(chart) {
+        // Make the AJAX request with the selected date or date range
+        $.ajax({
+          url: "/fetch_chart",
+          type: "POST",
+          data: JSON.stringify({
+            chartName: chart.name,
+            startTimestamp: startTimestamp,
+            endTimestamp: endTimestamp
+          }),
+          contentType: "application/json",
+          success: function(data) {
+            // Handle success response
+            if (data.success) {
+              if (data.filepath) {
+                // Replace the chart container with the new chart file
+                $(chart.container).html('<iframe src="' + data.filepath + '"></iframe>');
+              } else {
+                // Display an error message if the response is invalid
+                $(chart.container).html('<p class="error-message">Invalid response received for ' + chart.name + '.</p>');
+              }
+            } else {
+              // Display a generic error message for server-side errors
+              $(chart.container).html('<p class="error-message">No data available for ' + chart.name + '.</p>');
+            }
+          },
+          error: function(xhr, status, error) {
+            // Display a generic error message for client-side errors
+            $(chart.container).html('<p class="error-message">An error occurred while making the request for ' + chart.name + '.</p>');
+          },
+          complete: function() {
+            // Hide the loading spinner when all requests are complete
+            hideLoadingSpinner();
+          }
+        });
+      });
+    });
+
+    function getUnixTimestamp(date) {
+      // Convert the date string in format 'DD/MM/YYYY' to Unix timestamp (in seconds)
+      var momentDate = moment(date, 'DD/MM/YYYY');
+      return momentDate.unix();
+    }
+});  
+</script>
+  
+<div class="main-container">
+    <div class="navcontainer">
+        <nav class="nav">
+            <div class="nav-upper-options">
+                <div class="nav-option">
+                    <a href="/">
+                      <h3>Routes</h3>
+                    </a>
+                </div>
+                <div class="nav-option active">
+                  <a href="/sensors">
+                      <h3>Sensors</h3>
+                  </a>
+                </div>
+                <div class="nav-option ">
+                        <a href="/logout">
+                            <h3>Logout</h3>
+                        </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="main">
+        <div class="report-container">
+            <!-- (START) SELECT TIME RANGE -->
+            <div class="dates-container">
+                <div class="buttons">
+                <button id="selectRangeBtn" class="active">Select time range</button>
+                <button id="selectSingleDateBtn" class="active">Select a single date</button>
+                </div>
+                <div id="rangePickerContainer" class="range-picker-container">
+                <!-- The date range picker will be dynamically inserted here -->
+                </div>
+                <div id="singleDatePickerContainer" class="range-picker-container">
+                <!-- The date range picker will be dynamically inserted here -->
+                </div>
+                <div class="submit-container">
+                <button id="submitBtn">Submit</button>
+                </div>
+            </div>
+            <!-- (END) SELECT TIME RANGE -->
+
+            <div id="accelerometer-container">
+                    <iframe src=""></iframe>
+            </div>
+            <div id="magnetometer-container">
+                <iframe src=""></iframe>
+            </div> 
+            <div id="gyroscope-container">
+                <iframe src=""></iframe>
+            </div> 
+            <div id="proximity-container">     
+                <iframe src=""></iframe>
+            </div>   
+            <div id="pressure-container">
+              <iframe src=""></iframe>
+            </div>        
+        </div>
+    </div>
+</div>
+
+{% endblock %}
